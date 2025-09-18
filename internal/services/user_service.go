@@ -39,7 +39,6 @@ func (us *UserService) CreateUser(ctx context.Context, userName, email, password
 	}
 
 	id, err := us.queries.CreateUser(ctx, args)
-
 	if err != nil {
 		var pgErr *pgconn.PgError
 
@@ -50,4 +49,7 @@ func (us *UserService) CreateUser(ctx context.Context, userName, email, password
 	}
 
 	return id, nil
+}
+
+func (us *UserService) AuthenticateUser(ctx context.Context, email, password string) (uuid.UUID, error) {
 }

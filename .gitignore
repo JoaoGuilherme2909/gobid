@@ -1,3 +1,4 @@
 .env
 init_app.sh
 tmp
+bin
