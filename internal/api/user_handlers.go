@@ -1,3 +1,4 @@
+// Package api
 package api
 
 import (
@@ -36,8 +37,47 @@ func (api *Api) handleLoginUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		jsonutils.EncodeJson(w, r, http.StatusUnprocessableEntity, problems)
 	}
+
+	id, err := api.UserService.AuthenticateUser(r.Context(), data.Email, data.Password)
+	if err != nil {
+		if errors.Is(err, services.ErrInvalidCredentials) {
+			jsonutils.EncodeJson(w, r, http.StatusUnauthorized, map[string]any{
+				"error": "invalid email or password",
+			})
+			return
+		}
+		jsonutils.EncodeJson(w, r, http.StatusInternalServerError, map[string]any{
+			"error": "unexpedcted internal server error",
+		})
+		return
+	}
+
+	err = api.Sessions.RenewToken(r.Context())
+	if err != nil {
+		jsonutils.EncodeJson(w, r, http.StatusInternalServerError, map[string]any{
+			"error": "unexpedcted server error",
+		})
+		return
+	}
+
+	api.Sessions.Put(r.Context(), "AuthenticatedUserId", id)
+
+	jsonutils.EncodeJson(w, r, http.StatusOK, map[string]any{
+		"message": "logged in, sucessfully",
+	})
 }
 
 func (api *Api) handleLogoutUser(w http.ResponseWriter, r *http.Request) {
-	panic("TODO - NOT IMPLEMENTED")
+	err := api.Sessions.RenewToken(r.Context())
+	if err != nil {
+		jsonutils.EncodeJson(w, r, http.StatusInternalServerError, map[string]any{
+			"error": "unexpedcted server error",
+		})
+		return
+	}
+
+	api.Sessions.Remove(r.Context(), "AuthenticatedUserId")
+	jsonutils.EncodeJson(w, r, http.StatusOK, map[string]any{
+		"message": "logged out, sucessfully",
+	})
 }
