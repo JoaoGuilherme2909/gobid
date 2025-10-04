@@ -8,18 +8,18 @@ import (
 	"github.com/joaoguilherme2909/goBid/internal/validator"
 )
 
-func EncodeJson[T any](w http.ResponseWriter, r *http.Request, statusCode int, data T) error {
+func EncodeJSON[T any](w http.ResponseWriter, r *http.Request, statusCode int, data T) error {
 	w.Header().Set("Content-Type", "Application/json")
 	w.WriteHeader(statusCode)
 
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		return fmt.Errorf("Failed to encode json %w", err)
+		return fmt.Errorf("failed to encode json %w", err)
 	}
 
 	return nil
 }
 
-func DecodeValidJson[T validator.Validator](r *http.Request) (T, map[string]string, error) {
+func DecodeValidJSON[T validator.Validator](r *http.Request) (T, map[string]string, error) {
 	var data T
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -33,7 +33,7 @@ func DecodeValidJson[T validator.Validator](r *http.Request) (T, map[string]stri
 	return data, nil, nil
 }
 
-func DecodeJson[T any](r *http.Request) (T, error) {
+func DecodeJSON[T any](r *http.Request) (T, error) {
 	var data T
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
